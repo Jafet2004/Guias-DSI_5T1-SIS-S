@@ -5,7 +5,7 @@
 
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -15,38 +15,42 @@ datasource db {
 }
 
 
-model Profile{
-  id      Int @id @default(autoincrement())
-  userId  Int
-  user User @relation(fields: [userId], references: [id])
+// Relación 1 a 1 (Usuario - Perfil)
+model Profile {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique // <-- Atributo obligatorio para relaciones 1 a 1
+  user   User @relation(fields: [userId], references: [id])
 }
 
-model Tenant{
-  id                Int                 @id @default(autoincrement())
-  users            User[] //Lado "1"
+// Relación 1 a N (Tenant - Usuario)
+model Tenant {
+  id    Int    @id @default(autoincrement())
+  users User[] // Lado "1"
 }
 
-model User{
-  id                Int                 @id @default(autoincrement())
-  tenantId          Int
-  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+model User {
+  id       Int      @id @default(autoincrement())
+  tenantId Int
+  tenant   Tenant   @relation(fields: [tenantId], references: [id]) // Lado "N"
+  profile  Profile?
 }
 
-model Post{
-  postId            Int                 @id @default(autoincrement())
-  categories          PostCategory[]         
+// Relación N a N (Post - Category)
+model Post {
+  postId     Int            @id @default(autoincrement())
+  categories PostCategory[]
 }
 
-model Category{
-  id                Int                 @id @default(autoincrement())
-  posts             PostCategory[]         
+model Category {
+  id    Int            @id @default(autoincrement())
+  posts PostCategory[]
 }
 
-model PostCategory{
-  postId            Int
-  categoryId        Int
-  post              Post                @relation(fields: [postId], references: [postId])
-  category          Category            @relation(fields: [categoryId], references: [id])
+model PostCategory {
+  postId     Int
+  categoryId Int
+  post       Post     @relation(fields: [postId], references: [postId])
+  category   Category @relation(fields: [categoryId], references: [id])
 
   @@id([postId, categoryId])
 }
